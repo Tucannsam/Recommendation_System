@@ -13,3 +13,26 @@ def bias_baseline(R):
   b_item[has_rating] = (
       np.nansum(residual, axis=0)[has_rating] / n_item[has_rating])
   return mu, b_user, b_item
+
+def baseline_matrix(R):
+  mu, b_user, b_item = bias_baseline(R)
+  return mu + b_user[:, None] + b_item[None, :]
+
+B = baseline_matrix(R)
+
+print("shape:", B.shape)
+print("baseline test RMSE:", round(score(B), 4))
+
+def rank_k(U, s, Vt, k):
+  return U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
+
+def iterative_svd_predict(R, k, n_iter=15):
+  known = ~np.isnan(R)
+  B = baseline_matrix(R)
+  X = np.where(known, R - B, 0.0)
+
+  for _ in range(n_iter):
+    U, s, Vt = np.linalg.svd(X, full_matrices=False)
+    L = rank_k(U, s, Vt, k)
+    X = np.where(known, R - B, L) # known ratings stay fixed
+  return L + B
