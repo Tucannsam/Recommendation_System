@@ -1,4 +1,3 @@
-
 import os, urllib.request, zipfile
 import numpy as np
 import pandas as pd
@@ -35,9 +34,8 @@ def to_matrix(df):
 R = to_matrix(train)
 known = ~np.isnan(R)
 
-print(Matrix shape:, R.shape)
-print(Known training ratings:, known.sum())
+print("Matrix shape: ", R.shape)
+print("Known training ratings: ", known.sum())
 
 def rmse(pred, truth):
-Root mean squared error, measured in stars.
-return np.sqrt(np.mean((pred - truth)**2))
+  return np.sqrt(np.mean((pred - truth)**2))
