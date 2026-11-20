@@ -1,5 +1,3 @@
-import numpy as np
-
 def bias_baseline(R):
   known = ~np.isnan(R)
   mu = np.nanmean(R)
@@ -17,11 +15,6 @@ def bias_baseline(R):
 def baseline_matrix(R):
   mu, b_user, b_item = bias_baseline(R)
   return mu + b_user[:, None] + b_item[None, :]
-
-B = baseline_matrix(R)
-
-print("shape:", B.shape)
-print("baseline test RMSE:", round(score(B), 4))
 
 def rank_k(U, s, Vt, k):
   return U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
