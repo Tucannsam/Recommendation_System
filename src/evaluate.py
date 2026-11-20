@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+N_USERS, N_ITEMS = 943, 1682
 
 def split_ratings(ratings, user_col="user", item_col="item",
                   test_frac=0.10, seed=0):
