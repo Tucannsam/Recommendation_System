@@ -1,34 +1,35 @@
 import numpy as np
 import pandas as pd
 
-def bias_baseline(R):
-  known = ~np.isnan(R)
-  mu = np.nanmean(R)
+def split_ratings(ratings, user_col="user", item_col="item",
+                  test_frac=0.10, seed=0):
+  rng = np.random.default_rng(seed)
+  is_test = np.zeros(len(ratings), dtype=bool)
 
-  b_user = np.nanmean(R - mu, axis=1)
-  residual = R - mu - b_user[:, None]
+  user_left = ratings.groupby(user_col).size().to_dict()
+  item_left = ratings.groupby(item_col).size().to_dict()
 
-  n_item = known.sum(axis=0)
-  b_item = np.zeros(R.shape[1])
-  has_rating = n_item > 0
-  b_item[has_rating] = (
-      np.nansum(residual, axis=0)[has_rating] / n_item[has_rating])
-  return mu, b_user, b_item
+  users = ratings[user_col].to_numpy()
+  items = ratings[item_col].to_numpy()
 
-def baseline_matrix(R):
-  mu, b_user, b_item = bias_baseline(R)
-  return mu + b_user[:, None] + b_item[None, :]
+  for pos in rng.permutation(len(ratings)):
+    row = ratings.iloc[pos]
+    user, item = row[user], row[item]
 
-def rank_k(U, s, Vt, k):
-  return U[:, :k] @ np.diag(s[:k]) @ Vt[:k, :]
+    if (rng.random() < test_frac
+          and user_left[u] > 1
+          and item_left[i] > 1):
+      is_test[pos] = True
+      user_left[u] -= 1
+      tem_left[i] -= 1
 
-def iterative_svd_predict(R, k, n_iter=15):
-  known = ~np.isnan(R)
-  B = baseline_matrix(R)
-  X = np.where(known, R - B, 0.0)
+  return ratings.iloc[~is_test].copy(), ratings.iloc[is_test].copy()
 
-  for _ in range(n_iter):
-    U, s, Vt = np.linalg.svd(X, full_matrices=False)
-    L = rank_k(U, s, Vt, k)
-    X = np.where(known, R - B, L) # known ratings stay fixed
-  return L + B
+def to_matrix(df):
+  R = np.full((N_USERS, N_ITEMS), np.nan)
+  R[df['user'].to_numpy() - 1,
+    df['item'].to_numpy() - 1] = df['rating'].to_numpy()
+  return R
+
+def rmse(pred, truth):
+  return np.sqrt(np.mean((pred - truth)**2))
