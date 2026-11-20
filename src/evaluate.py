@@ -24,3 +24,26 @@ def split_ratings(ratings, user_col="user", item_col="item",
 train, test = split_ratings(ratings, user_col="user", item_col="item")
 print("train: ", len(train),"\ntest: ", len(test))
 print("test fraction: ", round(len(test) / len(ratings), 3))
+
+# PART C:
+N_USERS, N_ITEMS = 943, 1682
+
+def to_matrix(df):
+  R = np.full((N_USERS, N_ITEMS), np.nan)
+  R[df['user'].to_numpy() - 1,
+    df['item'].to_numpy() - 1] = df['rating'].to_numpy()
+  return R
+
+R = to_matrix(train)
+known = ~np.isnan(R)
+
+print("Matrix shape: ", R.shape)
+print("Known training ratings: ", known.sum())
+
+truth = test['rating'].to_numpy()
+u = test['user'''].to_numpy() - 1
+i = test['item'].to_numpy() - 1
+
+#PART D:
+def rmse(pred, truth):
+  return np.sqrt(np.mean((pred - truth)**2))
