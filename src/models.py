@@ -1,3 +1,5 @@
+import numpy as np
+
 def bias_baseline(R):
   known = ~np.isnan(R)
   mu = np.nanmean(R)
