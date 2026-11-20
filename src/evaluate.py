@@ -31,15 +31,5 @@ def to_matrix(df):
     df['item'].to_numpy() - 1] = df['rating'].to_numpy()
   return R
 
-R = to_matrix(train)
-known = ~np.isnan(R)
-
-print("Matrix shape: ", R.shape)
-print("Known training ratings: ", known.sum())
-
-truth = test['rating'].to_numpy()
-u = test['user'''].to_numpy() - 1
-i = test['item'].to_numpy() - 1
-
 def rmse(pred, truth):
   return np.sqrt(np.mean((pred - truth)**2))
